@@ -1,37 +1,31 @@
 import json
+import event_file_io
 from time import time
-from os.path import exists as file_exists
+from types import SimpleNamespace
 
-ROOT_PATH = "/var/casadetasha/water-alert/"
-EVENT_LOGS_FILE_PATH = ROOT_PATH + "collection_event_logs.txt"
-LAST_EVENT_FILE_PATH = ROOT_PATH + "last_collection_event.txt"
-TEN_MINUTES_TO_SECONDS = 60*10
+class Event(object):
+    timeInSeconds = 0,
+    eventType = "awaiting_first_event"
 
-BLANK_EVENT_JSON = json.dumps({
-        "eventTimeInSeconds": 0,
-        "eventType": "awaiting_first_event"
-})
+    def __init__(self, timeInSeconds, eventType):
+        self.timeInSeconds = timeInSeconds,
+        self.eventType = eventType
 
-if file_exists(LAST_EVENT_FILE_PATH):
-    textFile = open(LAST_EVENT_FILE_PATH, "r")
-    fileContent = textFile.read()
-    textFile.close()
-else:
-    fileContent = BLANK_EVENT_JSON
+    def toJSON(self):
+        return json.dumps(self, default=lambda o: o.__dict__, sort_keys=True, indent=4)
 
-print("Loading " + fileContent)
-workingJson = json.loads(fileContent)
-loadedTimeString = str(workingJson["eventTimeInSeconds"])
 
-print("Last loaded time: " + loadedTimeString)
+def manageIncomingEvent(eventTimeInSeconds):
+    lastEvent = json.loads(event_file_io.loadLastEvent(), object_hook=lambda d: Event(**d))
 
-workingJson["eventTimeInSeconds"] = int(time())
+    lastEvent.timeInSeconds = incomingEventTimeInSeconds
+    eventJson = lastEvent.toJSON()
 
-textFile = open(LAST_EVENT_FILE_PATH, "w")
-textFile.write(json.dumps(workingJson) + "\n")
-textFile.close()
+    print("Storing event from: " + str(incomingEventTimeInSeconds))
+    event_file_io.storeLastEvent(eventJson)
+    event_file_io.addEventToLogs(eventJson)
 
-textFile = open(EVENT_LOGS_FILE_PATH, "a")
-textFile.write(json.dumps(workingJson) + "\n\n------------\n\n")
-textFile.close()
 
+if __name__ == "__main__":
+    incomingEventTimeInSeconds = int(time())
+    manageIncomingEvent(incomingEventTimeInSeconds)
