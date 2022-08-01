@@ -3,17 +3,34 @@ import event_file_io
 from event import Event
 from water_notifier import shouldNotifyWaterActivated, notifyWaterAvailable
 
-def manageIncomingEvent(eventTimeInSeconds):
-    lastEvent = event_file_io.loadLastEvent()
+def shouldStoreIncomingEvent(oldEvent, newEvent):
+    if oldEvent.eventType == newEvent.eventType:
+        print("Event types are equal")
+        return False
+    else:
+        return True
 
-    newEvent = Event(timeInSeconds = eventTimeInSeconds, eventType = "WATER_DETECTED")
+def processEvents(eventTimeInSeconds, oldEvent, newEvent):
+    print("New event: " + newEvent.eventType)
     eventJson = newEvent.toJSON()
 
-    print("Storing event from: " + str(eventTimeInSeconds))
-    event_file_io.storeLastEvent(eventJson)
-    event_file_io.logLastEvent(eventJson)
+    if shouldStoreIncomingEvent(oldEvent, newEvent):
+        print("Storing event from: " + str(eventTimeInSeconds))
+        event_file_io.storeLastEvent(eventJson)
+        event_file_io.logLastEvent(eventJson)
+    else:
+        print("Not storing event")
 
     print("Checking water updated alert")
-    if shouldNotifyWaterActivated(lastEvent, newEvent):
+    if shouldNotifyWaterActivated(oldEvent, newEvent):
         notifyWaterAvailable()
+
+    print("")
+    print("")
+
+def manageIncomingEvent(eventTimeInSeconds, incomingEventType):
+    oldEvent = event_file_io.loadLastRecordedEvent()
+    newEvent = Event(timeInSeconds = eventTimeInSeconds, eventType = incomingEventType)
+
+    processEvents(eventTimeInSeconds, oldEvent, newEvent)
 

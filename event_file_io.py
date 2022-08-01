@@ -6,18 +6,18 @@ ROOT_PATH = "/var/casadetasha/water-alert/"
 EVENT_LOGS_FILE_PATH = ROOT_PATH + "collection_event_logs.txt"
 LAST_EVENT_FILE_PATH = ROOT_PATH + "last_collection_event.txt"
 
-def loadLastEvent():
+def loadLastRecordedEvent():
     if file_exists(LAST_EVENT_FILE_PATH):
         textFile = open(LAST_EVENT_FILE_PATH, "r")
-        lastEventData = textFile.read()
+        lastRecordedEventData = textFile.read()
         textFile.close()
 
-        lastEvent = json.loads(lastEventData, object_hook=lambda d: Event(**d))
+        lastRecordedEvent = json.loads(lastRecordedEventData, object_hook=lambda d: Event(**d))
     else:
-        lastEvent = Event(timeInSeconds = -1)
+        lastRecordedEvent = Event(timeInSeconds = -1)
 
-    print("LoadedEvent: " + lastEvent.eventType + " | time: " + str(lastEvent.timeInSeconds))
-    return lastEvent
+    print("LoadedEvent: " + lastRecordedEvent.eventType + " | time: " + str(lastRecordedEvent.timeInSeconds))
+    return lastRecordedEvent
 
 def storeLastEvent(event):
     textFile = open(LAST_EVENT_FILE_PATH, "w")
