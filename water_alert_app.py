@@ -1,28 +1,25 @@
 from time import time
 from event import Event
 from water_event_manager import manageIncomingEvent, processWake
-import RPi.GPIO as GPIO
+from gpio_sensor import startSensorSetup, addSensorEventCallback, endSensorSetup, sensorIsActive, GPIO_CHANNEL
 
-GPIO_CHANNEL = 10
-
-def connection_changed(channel):
+def processCurrentConnection(channel):
     incomingEventTimeInSeconds = int(time())
 
-    if GPIO.input(GPIO_CHANNEL) > 0:
+    if sensorIsActive():
         manageIncomingEvent(incomingEventTimeInSeconds, Event.WATER_FILLED)
     else:
         manageIncomingEvent(incomingEventTimeInSeconds, Event.WATER_DRAINED)
 
+def manageSensor():
+    startSensorSetup()
+    addSensorEventCallback(processCurrentConnection)
+    processCurrentConnection(GPIO_CHANNEL)
+    endSensorSetup()
+
 
 if __name__ == "__main__":
     processWake()
-    GPIO.setwarnings(False)
-    GPIO.setmode(GPIO.BOARD)
-    GPIO.setup(GPIO_CHANNEL, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
-
-    GPIO.add_event_detect(GPIO_CHANNEL, GPIO.BOTH, callback=connection_changed)
-    connection_changed(GPIO_CHANNEL)
-
+    manageSensor()
     message = input("Press enter to quit\n\n")
-    GPIO.cleanup()
 

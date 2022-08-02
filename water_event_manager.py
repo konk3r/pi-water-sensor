@@ -5,8 +5,7 @@ from water_notifier import shouldNotifyWaterActivated, notifyWaterAvailable
 
 def processWake():
     wakeEvent = Event(eventType = Event.WAKE_UP)
-    event_file_io.logLastEvent(wakeEvent)
-
+    event_file_io.logEvent(wakeEvent)
 
 def shouldStoreIncomingEvent(oldEvent, newEvent):
     if oldEvent.eventType == newEvent.eventType:
@@ -17,12 +16,11 @@ def shouldStoreIncomingEvent(oldEvent, newEvent):
 
 def processEvents(eventTimeInSeconds, oldEvent, newEvent):
     print("New event: " + newEvent.eventType)
-    eventJson = newEvent.toJSON()
 
     if shouldStoreIncomingEvent(oldEvent, newEvent):
         print("Storing event from: " + str(eventTimeInSeconds))
-        event_file_io.storeLastEvent(eventJson)
-        event_file_io.logLastEvent(eventJson)
+        event_file_io.storeLastEvent(newEvent)
+        event_file_io.logEvent(newEvent)
     else:
         print("Not storing event")
 
