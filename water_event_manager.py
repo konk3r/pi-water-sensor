@@ -3,6 +3,11 @@ import event_file_io
 from event import Event
 from water_notifier import shouldNotifyWaterActivated, notifyWaterAvailable
 
+def processWake():
+    wakeEvent = Event(eventType = Event.WAKE_UP)
+    event_file_io.logLastEvent(wakeEvent)
+
+
 def shouldStoreIncomingEvent(oldEvent, newEvent):
     if oldEvent.eventType == newEvent.eventType:
         print("Event types are equal")

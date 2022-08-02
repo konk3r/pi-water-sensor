@@ -21,11 +21,11 @@ def loadLastRecordedEvent():
 
 def storeLastEvent(event):
     textFile = open(LAST_EVENT_FILE_PATH, "w")
-    textFile.write(event + "\n")
+    textFile.write(event.toJSON() + "\n")
     textFile.close()
 
 def logLastEvent(event):
     textFile = open(EVENT_LOGS_FILE_PATH, "a")
-    textFile.write(event + "\n\n------------\n\n")
+    textFile.write(event.toJSON() + "\n\n------------\n\n")
     textFile.close()
 

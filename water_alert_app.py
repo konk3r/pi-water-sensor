@@ -1,6 +1,6 @@
 from time import time
 from event import Event
-from water_event_manager import manageIncomingEvent
+from water_event_manager import manageIncomingEvent, processWake
 import RPi.GPIO as GPIO
 
 GPIO_CHANNEL = 10
@@ -15,6 +15,7 @@ def connection_changed(channel):
 
 
 if __name__ == "__main__":
+    processWake()
     GPIO.setwarnings(False)
     GPIO.setmode(GPIO.BOARD)
     GPIO.setup(GPIO_CHANNEL, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
