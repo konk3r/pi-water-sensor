@@ -1,11 +1,30 @@
 import json
+from time import time
 import event_file_io
 from event import Event
 from water_notifier import shouldNotifyWaterActivated, notifyWaterAvailable
+from gpio_sensor import sensorIsActive
+
+def processCurrentConnection(channel):
+    incomingEventTimeInSeconds = int(time())
+
+    if sensorIsActive():
+        manageIncomingEvent(incomingEventTimeInSeconds, Event.WATER_FILLED)
+    else:
+        manageIncomingEvent(incomingEventTimeInSeconds, Event.WATER_DRAINED)
+
+def connection_changed(channel):
+    incomingEventTimeInSeconds = int(time())
+
+    if GPIO.input(GPIO_CHANNEL) > 0:
+        manageIncomingEvent(incomingEventTimeInSeconds, Event.WATER_FILLED)
+    else:
+        manageIncomingEvent(incomingEventTimeInSeconds, Event.WATER_DRAINED)
 
 def processWake():
     wakeEvent = Event(eventType = Event.WAKE_UP)
     event_file_io.logEvent(wakeEvent)
+
 
 def shouldStoreIncomingEvent(oldEvent, newEvent):
     if oldEvent.eventType == newEvent.eventType:
